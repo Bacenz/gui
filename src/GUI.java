@@ -2,8 +2,9 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.text.DecimalFormat;
 
-public class GUI {
+public class GUI implements ActionListener{
 
     private static JPanel panel;
     private static JFrame frame;
@@ -19,9 +20,7 @@ public class GUI {
 
     private static JComboBox resultBox;
     private static JComboBox box;
-
-
-    public static void main(String[] args) {
+    public GUI(){
 
         panel = new JPanel();
         frame = new JFrame("Unit Conversion");
@@ -38,6 +37,7 @@ public class GUI {
         //Add button
         JButton button = new JButton("Convert");
         button.setBounds(110,75,90,25);
+        button.addActionListener(this);
 
         //Prompt user's input
         label = new JLabel("Enter the value");
@@ -52,7 +52,7 @@ public class GUI {
         convert.setBounds(10,100,150,25);
 
         //Selection box
-        String[] units = {"cm","inch","foot","m"};
+        String[] units = {"cm","m","inch","foot"};
         box = new JComboBox(units);
         box.setSelectedIndex(0);
         box.setBounds(10,125,90,25);
@@ -68,7 +68,7 @@ public class GUI {
 
         //Result
         finalResult = new JLabel("Result is: 0");
-        finalResult.setBounds(10,200,90,25);
+        finalResult.setBounds(10,200,150,25);
 
         //Panel setup
         panel.setBorder(BorderFactory.createEmptyBorder(30,30,10,30));
@@ -89,5 +89,84 @@ public class GUI {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         //frame.pack();
         frame.setVisible(true);
+    }
+
+    public static void main(String[] args) {
+        new GUI();
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        //Format the output
+        DecimalFormat format = new DecimalFormat("0.00##");
+
+        //Get string from userInput text field and convert to double
+        String input = userInput.getText();
+        double inputD = 0;
+        double res = 0;
+
+        //State system to display input
+        int state = 0;
+
+        //Check the input
+        if(input.isEmpty()) {
+            state = 1;
+        } else {
+            try {
+                inputD = Double.parseDouble(input);
+            } catch (NumberFormatException nfe){
+                state = 2;
+            }
+        }
+
+        //Get input from combobox
+        int x = box.getSelectedIndex();
+        int y = resultBox.getSelectedIndex();
+
+        //Display the result according to state
+        if(state == 0) {
+            //Display the result
+            if (x == y) {
+                res = inputD;
+                finalResult.setText("Result: " + res);
+            } else if (x == 0) { //cm to different unit
+                if (y == 1) {
+                    res = inputD / 100;
+                } else if (y == 2) {
+                    res = inputD / 2.54;
+                } else {
+                    res = inputD / 30.48;
+                }
+            } else if (x == 1) { //m to different unit
+                if (y == 0) {
+                    res = inputD * 100;
+                } else if (y == 2) {
+                    res = inputD * 39.37;
+                } else {
+                    res = inputD / 3.281;
+                }
+            } else if (x == 2) {//inch to different unit
+                if (y == 0) {
+                    res = inputD * 2.54;
+                } else if (y == 1) {
+                    res = inputD / 39.37;
+                } else {
+                    res = inputD / 12;
+                }
+            } else { //foot to different unit
+                if (y == 0) {
+                    res = inputD * 30.48;
+                } else if (y == 1) {
+                    res = inputD / 3.281;
+                } else {
+                    res = inputD * 12;
+                }
+            }
+            finalResult.setText("Results: " + format.format(res) + " " + resultBox.getSelectedItem());
+        } else if(state == 1){
+            finalResult.setText("Input is empty");
+        } else {
+            finalResult.setText("Invalid Input");
+        }
     }
 }
